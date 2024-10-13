@@ -70,6 +70,9 @@ async function generatePlan(newTaskText, username, bot) {
     const tasks = extractTasksFromPlan(planText);
     
     try {
+
+        console.log(tasks);
+        
         // Заменяем старые задачи на новый план
         user.plans = tasks;
 
