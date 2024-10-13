@@ -140,12 +140,16 @@ function scheduleTask(task, username, bot) {
         return;
     }
 
-    // Конвертируем время пользователя в локальное время сервера
-    const serverTime = moment.tz(`${hours}:${minutes}`, 'HH:mm', 'Asia/Almaty') // Если пользователи в Казахстане
-                          .tz('America/Los_Angeles'); // Часовой пояс сервера (Орегон)
+    // Конвертируем время пользователя в локальное время сервера (Орегон)
+    const userTime = moment.tz(`${hours}:${minutes}`, 'HH:mm', 'Asia/Almaty'); // Время пользователя (Казахстан)
+    const serverTime = userTime.clone().tz('America/Los_Angeles'); // Перевод в серверное время (Орегон)
 
     const serverHours = serverTime.format('HH');
     const serverMinutes = serverTime.format('mm');
+
+    // Логируем временные метки для отладки
+    console.log(`Время пользователя (Казахстан): ${userTime.format('HH:mm')}`);
+    console.log(`Конвертированное серверное время (Орегон): ${serverTime.format('HH:mm')}`);
 
     // Создаем задачу с помощью cron с учетом часового пояса сервера
     const cronTime = `${serverMinutes} ${serverHours} * * *`; // Ежедневно в определенное время на сервере
