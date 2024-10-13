@@ -84,11 +84,11 @@ async function generatePlan(newTaskText, username, bot) {
         console.log('Новый план успешно сохранен в базе данных');
 
         if (scheduledTasks[username]) {
-            scheduledTasks[username].forEach(task => task.stop());
+            scheduledTasks[username].forEach(async task => await task.stop());
             console.log(`Удалены старые задачи для пользователя ${username}`);
         }
 
-        scheduledTasks[username] = tasks.map(task => scheduleTask(task, username, bot));    
+        scheduledTasks[username] = tasks.map(async task => await scheduleTask(task, username, bot));    
 
         // Возвращаем пользователю новый план
         return planText;
@@ -125,7 +125,7 @@ function extractTasksFromPlan(planText) {
     return tasks;
 }
 
-function scheduleTask(task, username, bot) {
+async function scheduleTask(task, username, bot) {
     // Получаем начало временного диапазона задачи
     const [startTime] = task.time.split('-').map(t => t.trim());
 
