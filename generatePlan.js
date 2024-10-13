@@ -106,14 +106,15 @@ function extractTasksFromPlan(planText) {
 
     const tasks = [];
     lines.forEach((line) => {
-        // Регулярное выражение для поиска времени в формате 'HH:MM - HH:MM'
-        const timeMatch = line.match(/\d{2}:\d{2}\s*-\s*\d{2}:\d{2}/);
+        // Регулярное выражение для поиска времени в формате 'HH:MM - HH:MM' или 'HH:MM - Задача'
+        const timeMatch = line.match(/\d{2}:\d{2}\s*(-\s*\d{2}:\d{2})?/);
 
         if (timeMatch) {
             // Извлекаем временной диапазон и задачу
             const timeRange = timeMatch[0].trim();
             const task = line.replace(timeRange, '').replace(':', '').trim(); // Убираем время и оставляем только задачу
             
+            // Проверка на случай, если время - это просто одно время (без диапазона)
             tasks.push({ task, time: timeRange });
         }
     });
