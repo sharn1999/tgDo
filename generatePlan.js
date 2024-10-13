@@ -131,6 +131,14 @@ function scheduleTask(task, username, bot) {
     // Извлекаем часы и минуты
     const [hours, minutes] = startTime.split(':');
 
+    console.log(`Планируем задачу на ${hours}:${minutes} для пользователя ${username}`);
+
+    // Проверка корректности часов и минут
+    if (!hours || !minutes || isNaN(hours) || isNaN(minutes)) {
+        console.error(`Ошибка в формате времени: ${startTime}`);
+        return;
+    }
+
     // Создаем задачу с помощью cron
     const cronTime = `${minutes} ${hours} * * *`; // Ежедневно в определенное время
 
@@ -153,7 +161,7 @@ function scheduleTask(task, username, bot) {
 
     console.log(`Задача "${task.task}" запланирована на ${startTime}`);
 
-    return scheduledTask
+    return scheduledTask;
 }
 
 module.exports = { generatePlan };
