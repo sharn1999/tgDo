@@ -2,6 +2,7 @@ const OpenAI = require('openai');
 require('dotenv').config();
 const cron = require('node-cron');
 const mongoose = require('mongoose');
+const moment = require('moment-timezone');
 const UserTG = require('./models/UserTG');
 
 const openai = new OpenAI({
@@ -139,8 +140,15 @@ function scheduleTask(task, username, bot) {
         return;
     }
 
-    // Создаем задачу с помощью cron
-    const cronTime = `${minutes} ${hours} * * *`; // Ежедневно в определенное время
+    // Конвертируем время пользователя в локальное время сервера
+    const serverTime = moment.tz(`${hours}:${minutes}`, 'HH:mm', 'Asia/Almaty') // Если пользователи в Казахстане
+                          .tz('America/Los_Angeles'); // Часовой пояс сервера (Орегон)
+
+    const serverHours = serverTime.format('HH');
+    const serverMinutes = serverTime.format('mm');
+
+    // Создаем задачу с помощью cron с учетом часового пояса сервера
+    const cronTime = `${serverMinutes} ${serverHours} * * *`; // Ежедневно в определенное время на сервере
 
     const scheduledTask = cron.schedule(cronTime, async () => {
         console.log(`Напоминание для пользователя ${username}: Пора выполнить задачу "${task.task}"`);
@@ -159,7 +167,7 @@ function scheduleTask(task, username, bot) {
         }
     });
 
-    console.log(`Задача "${task.task}" запланирована на ${startTime}`);
+    console.log(`Задача "${task.task}" запланирована на серверное время ${serverHours}:${serverMinutes}`);
 
     return scheduledTask;
 }
