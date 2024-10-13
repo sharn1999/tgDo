@@ -140,12 +140,7 @@ function scheduleTask(task, username, bot) {
         return;
     }
 
-    const timeInAlmaty = `${hours}:${minutes}`;
-
-    console.log(timeInAlmaty);
-    
-
-    const newCron = getCronTimeForAlmaty(timeInAlmaty)
+    const newCron = getCronTimeForAlmaty(startTime)
 
     // Создаем задачу с помощью cron
     const cronTime = `${minutes} ${hours} * * *`; // Ежедневно в определенное время
@@ -173,8 +168,12 @@ function scheduleTask(task, username, bot) {
 }
 
 function getCronTimeForAlmaty(almatyTime) {
-    const serverTime = moment.tz(almatyTime, 'Asia/Almaty').tz('America/Los_Angeles');
-    return `${serverTime.minutes()} ${serverTime.hours()} * * *`;
+
+    const [hours, minutes] = almatyTime.split(':');
+    const almatyDate = moment.tz({ hours: parseInt(hours), minutes: parseInt(minutes) }, 'Asia/Almaty');
+
+    const serverDate = almatyDate.clone().tz('America/Los_Angeles');
+    return `${serverDate.minutes()} ${serverDate.hours()} * * *`;
 }
 
 module.exports = { generatePlan };
