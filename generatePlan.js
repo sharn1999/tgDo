@@ -140,7 +140,12 @@ function scheduleTask(task, username, bot) {
         return;
     }
 
-    const newCron = getCronTimeForAlmaty(`${hours}:${minutes}`)
+    const timeInAlmaty = `${hours}:${minutes}`;
+
+    console.log(timeInAlmaty);
+    
+
+    const newCron = getCronTimeForAlmaty(timeInAlmaty)
 
     // Создаем задачу с помощью cron
     const cronTime = `${minutes} ${hours} * * *`; // Ежедневно в определенное время
