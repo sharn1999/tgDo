@@ -2,8 +2,8 @@ const OpenAI = require('openai');
 require('dotenv').config();
 const cron = require('node-cron');
 const mongoose = require('mongoose');
-const moment = require('moment-timezone');
 const UserTG = require('./models/UserTG');
+const moment = require('moment-timezone');
 
 const openai = new OpenAI({
     apiKey: process.env.OPENAI
@@ -84,11 +84,11 @@ async function generatePlan(newTaskText, username, bot) {
         console.log('Новый план успешно сохранен в базе данных');
 
         if (scheduledTasks[username]) {
-            scheduledTasks[username].forEach(async task => await task.stop());
+            scheduledTasks[username].forEach(task => task.stop());
             console.log(`Удалены старые задачи для пользователя ${username}`);
         }
 
-        scheduledTasks[username] = tasks.map(async task => await scheduleTask(task, username, bot));    
+        scheduledTasks[username] = tasks.map(task => scheduleTask(task, username, bot));    
 
         // Возвращаем пользователю новый план
         return planText;
@@ -125,7 +125,7 @@ function extractTasksFromPlan(planText) {
     return tasks;
 }
 
-async function scheduleTask(task, username, bot) {
+function scheduleTask(task, username, bot) {
     // Получаем начало временного диапазона задачи
     const [startTime] = task.time.split('-').map(t => t.trim());
 
@@ -140,21 +140,12 @@ async function scheduleTask(task, username, bot) {
         return;
     }
 
-    // Конвертируем время пользователя в локальное время сервера (Орегон)
-    const userTime = moment.tz(`${hours}:${minutes}`, 'HH:mm', 'Asia/Almaty'); // Время пользователя (Казахстан)
-    const serverTime = userTime.clone().tz('America/Los_Angeles'); // Перевод в серверное время (Орегон)
+    const newCron = getCronTimeForAlmaty(`${hours}:${minutes}`)
 
-    const serverHours = serverTime.format('HH');
-    const serverMinutes = serverTime.format('mm');
+    // Создаем задачу с помощью cron
+    const cronTime = `${minutes} ${hours} * * *`; // Ежедневно в определенное время
 
-    // Логируем временные метки для отладки
-    console.log(`Время пользователя (Казахстан): ${userTime.format('HH:mm')}`);
-    console.log(`Конвертированное серверное время (Орегон): ${serverTime.format('HH:mm')}`);
-
-    // Создаем задачу с помощью cron с учетом часового пояса сервера
-    const cronTime = `${serverMinutes} ${serverHours} * * *`; // Ежедневно в определенное время на сервере
-
-    const scheduledTask = cron.schedule(cronTime, async () => {
+    const scheduledTask = cron.schedule(newCron, async () => {
         console.log(`Напоминание для пользователя ${username}: Пора выполнить задачу "${task.task}"`);
 
         // Находим пользователя и отправляем ему сообщение
@@ -171,9 +162,14 @@ async function scheduleTask(task, username, bot) {
         }
     });
 
-    console.log(`Задача "${task.task}" запланирована на серверное время ${serverHours}:${serverMinutes}`);
+    console.log(`Задача "${task.task}" запланирована на ${startTime}`);
 
     return scheduledTask;
+}
+
+function getCronTimeForAlmaty(almatyTime) {
+    const serverTime = moment.tz(almatyTime, 'Asia/Almaty').tz('America/Los_Angeles');
+    return `${serverTime.minutes()} ${serverTime.hours()} * * *`;
 }
 
 module.exports = { generatePlan };
