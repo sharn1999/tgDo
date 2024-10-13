@@ -145,7 +145,7 @@ function scheduleTask(task, username, bot) {
     // Создаем задачу с помощью cron
     const cronTime = `${minutes} ${hours} * * *`; // Ежедневно в определенное время
 
-    const scheduledTask = cron.schedule(newCron, async () => {
+    const scheduledTask = cron.schedule(cronTime, async () => {
         console.log(`Напоминание для пользователя ${username}: Пора выполнить задачу "${task.task}"`);
 
         // Находим пользователя и отправляем ему сообщение
