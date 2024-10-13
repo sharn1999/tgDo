@@ -173,6 +173,10 @@ function getCronTimeForAlmaty(almatyTime) {
     const almatyDate = moment.tz({ hours: parseInt(hours), minutes: parseInt(minutes) }, 'Asia/Almaty');
 
     const serverDate = almatyDate.clone().tz('America/Los_Angeles');
+
+    console.log(`${serverDate.minutes()} ${serverDate.hours()} * * *`);
+    
+
     return `${serverDate.minutes()} ${serverDate.hours()} * * *`;
 }
 
